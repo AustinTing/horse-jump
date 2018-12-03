@@ -1,0 +1,23 @@
+{
+  "name": "horse-jump",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AustinTing/horse-jump.git"
+  },
+  "author": "Austin Ting",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/AustinTing/horse-jump/issues"
+  },
+  "homepage": "https://github.com/AustinTing/horse-jump#readme",
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "ramda": "^0.26.1"
+  }
+}
