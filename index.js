@@ -1,7 +1,5 @@
 const fs = require('fs')
-const fsPromises = fs.promises
 const _ = require('lodash')
-const r = require('ramda')
 
 const write = (() => {
   let times = 0
@@ -22,7 +20,6 @@ const initBoard = () => {
   }
   return board
 }
-var steps = []
 
 const formatBoard = board => {
   let thisBoard = _.cloneDeep(board)
@@ -31,9 +28,11 @@ const formatBoard = board => {
     let border = ''
     for (let j = 0; j < 9; j++) {
       if (_.isNull(thisBoard[i][j])) {
-        thisBoard[i][j] = 'nu'
+        thisBoard[i][j] = ' .'
       }
-      let numBorder = j === 8 ? (thisBoard[i][j] + '\n') : (thisBoard[i][j] + ' - ')
+      let num = thisBoard[i][j]
+      num = num < 10 ? ' ' + num : num
+      let numBorder = j === 8 ? (num + '\n') : (num + ' - ')
       fixBoard = fixBoard + numBorder
       border = border + ' |   '
     }
@@ -41,59 +40,79 @@ const formatBoard = board => {
   }
   return fixBoard
 }
+const sleep = milliseconds => {
+  return new Promise((resolve, reject) => {
+    var now = new Date().getTime()
+    while (new Date().getTime() < now + milliseconds) {
+    }
+    resolve()
+  })
+}
 
+var stepChoices = []
 const jump = (() => {
-  let jumpTime = 0
-  return (board, i, j, step) => {
-    jumpTime++
+  let bingoTime = 0
+  return async (board, i, j, step) => {
     if (i < 0 || i > 8 || j < 0 || j > 8) {
       return
     }
     if (board[i][j]) return
-    if (_.isUndefined(steps[step])) {
-      steps[step] = []
-    }
-    board[i][j] = steps.length
+    // await sleep(1000)
+    let prefixStep = step < 10 ? ' ' + step : step
+    board[i][j] = '\x1b[43m' + prefixStep + '\x1b[0m'
+    console.log(formatBoard(board))
+    board[i][j] = step
     let nextStep = step + 1
     let nextI
     let nextJ
     nextI = i + 1
     nextJ = j + 2
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 0
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i + 2
     nextJ = j + 1
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 1
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i + 2
     nextJ = j - 1
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 2
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i + 1
     nextJ = j - 2
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 3
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i - 1
     nextJ = j - 2
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 4
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i - 2
     nextJ = j - 1
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 5
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i - 2
     nextJ = j + 1
-    jump(board, nextI, nextJ, nextStep)
+    stepChoices[step] = 6
+    await jump(board, nextI, nextJ, nextStep)
     nextI = i - 1
     nextJ = j + 2
-    jump(board, nextI, nextJ, nextStep)
-    if (jumpTime % 10000000 === 0) {
-      console.log(jumpTime)
-      console.log(formatBoard(board))
-    }
+    stepChoices[step] = 7
+    await jump(board, nextI, nextJ, nextStep)
+    // console.log(`now step: ${step}, position: ${i}${j}, no next steps`)
     for (let m = 0; m < 9; m++) {
       for (let n = 0; n < 9; n++) {
         if (_.isNull(board[m][n])) {
+          // console.log(stepChoices.toString())
           board[i][j] = null
-          steps = _.initial(steps)
+          stepChoices = _.initial(stepChoices)
+          // bingoTime = bingoTime + 1
+          // write(bingoTime + '\n')
           return
         }
       }
     }
+    console.log(`Bingo!`)
+    bingoTime = bingoTime + 1
+    console.log(formatBoard(board))
     write(formatBoard(board))
   }
 }
@@ -111,7 +130,6 @@ const run = async () => {
   let j = 0
   let step = 0
   jump(board, i, j, step)
-  console.log('done')
 }
 
 run()
