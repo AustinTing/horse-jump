@@ -72,7 +72,8 @@ const countEmptyPosition = board => {
 }
 
 const isLonelySpaceExist = board => {
-  if (countEmptyPosition(board) === 1) return false // last one is lonely
+  if (countEmptyPosition(board) === 1 ||
+  countEmptyPosition(board) === 2) return false // last one or last two is lonely
   let tempBoard = initBoard()
   for (let i = 0; i < 9; i++) {
     for (let j = 0; j < 9; j++) {
@@ -140,7 +141,7 @@ const jump = (() => {
     }
     jumpTime++
     // await sleep(300)
-    if (jumpTime % 1000000 === 0) {
+    if (jumpTime % 10000000000 === 0) {
       console.log(jumpTime)
       let prefixStep = step < 10 ? ' ' + step : step
       board[i][j] = '\x1b[43m' + prefixStep + '\x1b[0m'
